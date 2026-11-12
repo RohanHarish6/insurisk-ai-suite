@@ -60,11 +60,3 @@ flowchart LR
 | `/` | `GET` | Service overview & status dashboard |
 | `/api/v1/underwrite/analyze` | `POST` | Commercial underwriting risk evaluation & pricing multiplier |
 | `/api/v1/fraud/inspect-network` | `POST` | Graph-based collusion ring detection & multi-factor anomaly scoring |
-
----
-
-## 💼 Resume & Portfolio Bullet Points
-
-- **Engineered InsuRisk-AI**: Architected a commercial underwriting copilot and SIU fraud analytics suite in Python and FastAPI, processing multi-year loss runs and performing graph-based anomaly detection.
-- **Advanced Graph Analytics**: Implemented multi-relational bipartite graph analysis using NetworkX to detect syndicated insurance fraud rings connecting claimants, medical providers, VINs, and addresses.
-- **Enterprise-Grade Reliability**: Built robust Pydantic data validation pipelines with automated unit and API integration tests (`pytest`).

@@ -4,3 +4,4 @@ networkx>=3.0
 uvicorn>=0.20.0
 pytest>=7.0.0
 requests>=2.28.0
+httpx2>=0.1.0

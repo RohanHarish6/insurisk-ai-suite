@@ -36,7 +36,7 @@ class UnderwritingEngine:
         factors.append(RiskFactor(
             factor_name="Loss Severity",
             score=sev_score,
-            description=f"Average loss amount of \${severity:,.2f} per incident."
+            description=f"Average loss amount of ${severity:,.2f} per incident."
         ))
         
         lr_score = min(100.0, loss_ratio * 500.0)
@@ -71,8 +71,8 @@ class UnderwritingEngine:
             
         narrative = (
             f"Underwriting evaluation for {request.insured_name} yielded a composite risk score of {composite}/100. "
-            f"Total historical losses stand at \${total_loss:,.2f} across {total_events} events. "
-            f"Based on loss frequency ({frequency:.1f}/yr) and severity (\${severity:,.2f}), the recommended "
+            f"Total historical losses stand at ${total_loss:,.2f} across {total_events} events. "
+            f"Based on loss frequency ({frequency:.1f}/yr) and severity (${severity:,.2f}), the recommended "
             f"action is {recommendation} with a pricing adjustment multiplier of {multiplier}x."
         )
         

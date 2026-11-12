@@ -48,11 +48,21 @@ class FraudEngine:
             total_amt = sum(claim_map[c.split(":")[1]].claim_amount for c in claims_in_comp if c.split(":")[1] in claim_map)
             
             shared_attrs = []
+            evidence = []
             for node in members:
                 if not node.startswith("Claim:"):
                     deg = G.degree(node)
                     if deg > 1:
                         shared_attrs.append(f"{node} (Degree: {deg})")
+                        evidence.append(
+                            f"{node} connects {deg} claims in the same component."
+                        )
+
+            if claims_in_comp:
+                evidence.append(
+                    f"Component contains {len(claims_in_comp)} claims totaling "
+                    f"${total_amt:,.2f}."
+                )
                         
             # Calculate risk score based on component size, multi-claim density, and amounts
             risk_score = min(100.0, (len(claims_in_comp) * 20.0) + (len(shared_attrs) * 15.0) + (total_amt / 10000.0))
@@ -70,7 +80,8 @@ class FraudEngine:
                 members=members,
                 shared_attributes=shared_attrs,
                 risk_score=risk_score,
-                recommendation=rec
+                recommendation=rec,
+                evidence=evidence
             ))
             cluster_id += 1
             

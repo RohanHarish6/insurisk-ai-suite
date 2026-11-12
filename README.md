@@ -51,6 +51,13 @@ flowchart LR
    ```
    * Open [http://localhost:8000/docs](http://localhost:8000/docs) for interactive Swagger documentation.
 
+### Docker
+
+```bash
+docker build -t insurisk-ai-suite .
+docker run --rm -p 8000:8000 insurisk-ai-suite
+```
+
 ---
 
 ## 📡 API Endpoints
@@ -58,5 +65,17 @@ flowchart LR
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
 | `/` | `GET` | Service overview & status dashboard |
+| `/health` | `GET` | Liveness check for deployment health probes |
 | `/api/v1/underwrite/analyze` | `POST` | Commercial underwriting risk evaluation & pricing multiplier |
 | `/api/v1/fraud/inspect-network` | `POST` | Graph-based collusion ring detection & multi-factor anomaly scoring |
+
+Every response includes an `X-Request-ID` header for traceability. Fraud clusters include
+evidence explaining which shared entities contributed to the result, while underwriting
+responses expose the individual scored risk factors.
+
+## Engineering
+
+- GitHub Actions runs the test suite against Python 3.10, 3.11, and 3.12.
+- Pydantic validates positive monetary values, non-negative counts, and non-empty analysis inputs.
+- The API emits structured request timing logs and basic security headers.
+- Generated caches, virtual environments, secrets, and build artifacts are excluded from Git.

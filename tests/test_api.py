@@ -11,6 +11,13 @@ class TestFastAPIApp(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("InsuRisk-AI Suite", response.text)
 
+    def test_health_endpoint_has_request_id_and_security_headers(self):
+        response = self.client.get("/health", headers={"X-Request-ID": "test-request"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "ok")
+        self.assertEqual(response.headers["X-Request-ID"], "test-request")
+        self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
+
     def test_underwrite_api(self):
         payload = {
             "policy_id": "POL-9999",
@@ -69,6 +76,21 @@ class TestFastAPIApp(unittest.TestCase):
         data = response.json()
         self.assertEqual(data["total_claims_analyzed"], 2)
         self.assertIn("clusters_detected", data)
+
+    def test_invalid_underwriting_input_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/underwrite/analyze",
+            json={
+                "policy_id": "POL-INVALID",
+                "insured_name": "Invalid Corp",
+                "loss_run_reports": [],
+                "annual_revenue": 0,
+                "employee_count": -1,
+                "industry_code": "000000",
+                "requested_limit": 0,
+            },
+        )
+        self.assertEqual(response.status_code, 422)
 
 if __name__ == "__main__":
     unittest.main()

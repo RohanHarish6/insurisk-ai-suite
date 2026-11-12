@@ -40,6 +40,7 @@ class TestFraudEngine(unittest.TestCase):
         self.assertEqual(res.total_claims_analyzed, 3)
         self.assertGreaterEqual(res.clusters_detected, 1)
         self.assertTrue(any("REFER TO SIU" in ring.recommendation for ring in res.high_risk_rings))
+        self.assertTrue(all(ring.evidence for ring in res.high_risk_rings))
 
 if __name__ == "__main__":
     unittest.main()

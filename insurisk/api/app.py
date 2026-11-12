@@ -1,6 +1,10 @@
-from fastapi import FastAPI, HTTPException
+import logging
+import time
+import uuid
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from typing import Dict, Any
+from fastapi.responses import JSONResponse
 
 from insurisk.underwriting.schemas import UnderwritingRequest, UnderwritingBrief
 from insurisk.underwriting.engine import UnderwritingEngine
@@ -12,6 +16,38 @@ app = FastAPI(
     version="1.0.0",
     description="Advanced Commercial Underwriting Copilot & Graph-based SIU Claim Fraud Analytics Engine."
 )
+logger = logging.getLogger("insurisk.api")
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        logger.exception("Unhandled request error", extra={"request_id": request_id})
+        response = JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "request_id": request_id},
+        )
+    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    logger.info(
+        "%s %s -> %s in %.3fs",
+        request.method,
+        request.url.path,
+        response.status_code,
+        time.perf_counter() - started,
+        extra={"request_id": request_id},
+    )
+    return response
+
+
+@app.get("/health", tags=["operations"])
+def health():
+    return {"status": "ok", "service": "insurisk-ai-suite", "version": app.version}
 
 @app.get("/", response_class=HTMLResponse)
 def root():
@@ -48,12 +84,12 @@ def root():
 def analyze_underwriting(request: UnderwritingRequest) -> UnderwritingBrief:
     try:
         return UnderwritingEngine.analyze_risk(request)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 @app.post("/api/v1/fraud/inspect-network", response_model=FraudInspectionResponse)
 def inspect_fraud_network(request: FraudNetworkRequest) -> FraudInspectionResponse:
     try:
         return FraudEngine.inspect_network(request)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
